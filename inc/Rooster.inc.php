@@ -9,7 +9,9 @@ class Rooster {
 	public $class = null;
 
 	function __construct() {
-		
+		if (!file_exists(__DIR__ . '/../cache')) {
+		    mkdir(__DIR__ . '/../cache', 0777, true);
+		}
 	}
 	
 	function setClass($input) {
