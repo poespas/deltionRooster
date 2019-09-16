@@ -9,9 +9,7 @@ class Rooster {
 	public $class = null;
 
 	function __construct() {
-		if (!file_exists(__DIR__ . '/../cache')) {
-		    mkdir(__DIR__ . '/../cache', 0777, true);
-		}
+		
 	}
 	
 	function setClass($input) {
@@ -42,11 +40,34 @@ class Rooster {
 		
 		if ($this->rooster == null) {
 			$rooster = json_decode(file_get_contents(__DIR__ . "/../cache/roosters/".$this->class.".json"), true);
-			if (!file_exists(__DIR__ . "/../cache/roosters/".$this->class.".json") || $rooster["updated"] <= time() - 86400) { //1 day
+			$exists = file_exists(__DIR__ . "/../cache/roosters/".$this->class.".json");
+			if (!$exists || $rooster["updated"] <= time() - 86400) { //1 day
+				
+				$result = [];
+
+				$new = $this->getNewRooster(time(), time() + (604800 * 2));
+				
+				if ($exists) {
+					
+					$old = $rooster["result"];
+					
+					foreach ($old as $item) {
+						foreach ($new as $newitem) {
+							if ($newitem["date_ts"] == $item["date_ts"])
+								break 2;
+						}
+
+						array_push($result, $item);
+					}
+				}
+
+				$result = array_merge($result, $new);
+			
 				$rooster = [
 					"updated" => time(),
-					"result"  => $this->getNewRooster(time(), time() + (604800 * 3))
+					"result"  => $result
 				];
+				
 				file_put_contents(__DIR__ . "/../cache/roosters/".$this->class.".json", json_encode($rooster));
 			}
 			
